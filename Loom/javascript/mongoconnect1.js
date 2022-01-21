@@ -66,15 +66,20 @@ async function run(mongoclient, Mongo_database, device) {
       // Pulls a specified number of packets in order from oldest to newest
       maxApi.addHandler("getLast", (packet_count) => {
         collection.countDocuments().then(num => {
-          let cursor = collection.find().skip(num - packet_count)
-          cursor.forEach(function(myDoc) {
-            delete myDoc._id;
-            delete myDoc.ts;
-            myDoc["ID"] = {"instance":device};
-            data = JSON.stringify(myDoc);
-            maxApi.post(data);
-            maxApi.outlet(data);
-          });
+         if(packet_count < num){
+          	let cursor = collection.find().skip(num - packet_count)
+          	cursor.forEach(function(myDoc) {
+			delete myDoc._id;
+			delete myDoc.ts;
+			myDoc["ID"] = {"instance":device};
+			data = JSON.stringify(myDoc);
+			maxApi.post(data);
+			maxApi.outlet(data);
+          	});
+	  }
+	  else{
+		maxApi.post("Requested number is more than the number of packets in the database!");
+	  }
         });
       });
 
